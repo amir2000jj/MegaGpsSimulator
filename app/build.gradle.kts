@@ -45,6 +45,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     // Map: osmdroid (OpenStreetMap) - no API key, no Google Play Services needed.
     implementation("org.osmdroid:osmdroid-android:6.1.18")
+    implementation("androidx.compose.runtime:runtime-saveable")
 
     testImplementation("junit:junit:4.13.2")
 }

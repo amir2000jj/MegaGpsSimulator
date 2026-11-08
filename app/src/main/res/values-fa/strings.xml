@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Mega GPS Simulator</string>
+
+    <string name="tab_map">نقشه</string>
+    <string name="tab_planner">مسیرساز</string>
+    <string name="tab_places">مکان‌ها</string>
+    <string name="tab_routes">مسیرها</string>
+    <string name="tab_settings">تنظیمات</string>
+    <string name="tab_about">درباره</string>
+
+    <string name="save">ذخیره</string>
+    <string name="cancel">لغو</string>
+    <string name="close">بستن</string>
+    <string name="delete">حذف</string>
+    <string name="load">بارگذاری</string>
+    <string name="use">استفاده</string>
+    <string name="apply">اعمال</string>
+    <string name="go">برو</string>
+    <string name="clear">پاک کردن</string>
+    <string name="name">نام</string>
+    <string name="show">نمایش</string>
+    <string name="hide">مخفی</string>
+    <string name="search">جستجو</string>
+    <string name="search_hint">جستجوی مکان یا آدرس</string>
+    <string name="points">نقطه</string>
+    <string name="unit_m">متر</string>
+    <string name="unit_km">کیلومتر</string>
+    <string name="unit_kmh">کیلومتر بر ساعت</string>
+
+    <string name="latitude">عرض جغرافیایی</string>
+    <string name="longitude">طول جغرافیایی</string>
+    <string name="start_here">شبیه‌سازی اینجا</string>
+    <string name="set_location">تنظیم به‌عنوان مکان شبیه‌سازی</string>
+    <string name="start_route">شروع مسیر</string>
+    <string name="my_location">موقعیت واقعی</string>
+    <string name="save_favorite">ذخیره در علاقه‌مندی‌ها</string>
+    <string name="pause">توقف موقت</string>
+    <string name="resume">ادامه</string>
+    <string name="stop">توقف</string>
+    <string name="restart">شروع مجدد</string>
+    <string name="reverse">برعکس</string>
+    <string name="speed">سرعت</string>
+    <string name="heading">جهت</string>
+    <string name="total">کل</string>
+    <string name="traveled">طی‌شده</string>
+    <string name="remaining">باقی‌مانده</string>
+    <string name="eta">زمان رسیدن</string>
+    <string name="walking_speed">سرعت پیاده‌روی</string>
+    <string name="custom_speed">سرعت دلخواه</string>
+    <string name="mode_walking">پیاده‌روی</string>
+    <string name="mode_running">دویدن</string>
+    <string name="mode_cycling">دوچرخه</string>
+    <string name="mode_driving">رانندگی</string>
+    <string name="mode_custom">دلخواه</string>
+    <string name="status_idle">شبیه‌سازی غیرفعال</string>
+    <string name="status_running">در حال شبیه‌سازی</string>
+    <string name="status_paused">متوقف‌شده</string>
+    <string name="status_completed">مسیر تمام شد</string>
+    <string name="status_error">خطا در شبیه‌سازی</string>
+
+    <string name="warn_permission">مجوز موقعیت مکانی داده نشده. برای راه‌اندازی لمس کنید.</string>
+    <string name="warn_mock">Mega GPS Simulator به‌عنوان برنامه‌ی موقعیت ساختگی انتخاب نشده. برای راه‌اندازی لمس کنید.</string>
+    <string name="warn_location_off">موقعیت مکانی (GPS) خاموش است. برای راه‌اندازی لمس کنید.</string>
+    <string name="err_mock">موقعیت ساختگی مجاز نیست. این برنامه را در گزینه‌های توسعه‌دهنده > انتخاب برنامه‌ی موقعیت ساختگی انتخاب کنید.</string>
+    <string name="err_permission">برای اجرای سرویس شبیه‌سازی، مجوز موقعیت مکانی لازم است.</string>
+    <string name="err_foreground">اندروید اجازه‌ی اجرای سرویس پیش‌زمینه را نداد.</string>
+
+    <string name="msg_invalid_coords">مختصات نامعتبر است</string>
+    <string name="msg_no_results">نتیجه‌ای پیدا نشد</string>
+    <string name="msg_network_error">خطای شبکه</string>
+    <string name="msg_select_point">ابتدا یک نقطه روی نقشه انتخاب کنید</string>
+    <string name="msg_need_two_points">حداقل دو نقطه لازم است</string>
+    <string name="msg_need_location_permission">مجوز موقعیت مکانی لازم است</string>
+    <string name="msg_real_while_sim">در زمان اجرای شبیه‌سازی، موقعیت واقعی در دسترس نیست</string>
+    <string name="msg_real_unavailable">خواندن موقعیت واقعی ممکن نشد</string>
+    <string name="msg_route_failed">دریافت مسیر ممکن نشد. اتصال اینترنت را بررسی کنید.</string>
+    <string name="msg_gpx_invalid">در این فایل GPX مسیر قابل‌استفاده‌ای پیدا نشد</string>
+    <string name="msg_saved">ذخیره شد</string>
+
+    <string name="planner_hint">برای افزودن نقطه روی نقشه بزنید. برای جابه‌جایی، نشانگر را نگه دارید و بکشید.</string>
+    <string name="import_gpx">ورود GPX</string>
+    <string name="auto_route">مسیریابی خودکار (آنلاین)</string>
+    <string name="save_route">ذخیره مسیر</string>
+    <string name="use_route">استفاده از مسیر</string>
+    <string name="routed_note">مسیر واردشده یا آنلاین فعال است. ویرایش نقاط، آن را به خطوط مستقیم برمی‌گرداند.</string>
+    <string name="start_point">شروع</string>
+    <string name="destination">مقصد</string>
+    <string name="waypoint">نقطه‌ی میانی</string>
+    <string name="no_places">هنوز مکانی ذخیره نشده. یک نقطه روی نقشه انتخاب کنید و «ذخیره در علاقه‌مندی‌ها» را بزنید.</string>
+    <string name="no_routes">هنوز مسیری ذخیره نشده. در مسیرساز یک مسیر بسازید و ذخیره کنید.</string>
+
+    <string name="sec_simulation">شبیه‌سازی</string>
+    <string name="update_interval">فاصله‌ی به‌روزرسانی موقعیت</string>
+    <string name="human_walking">حالت پیاده‌روی انسانی</string>
+    <string name="human_walking_desc">تغییرات کوچک و طبیعی سرعت هنگام پیاده‌روی. موقعیت همیشه روی مسیر می‌ماند.</string>
+    <string name="random_pauses">توقف‌های کوتاه تصادفی</string>
+    <string name="random_pauses_desc">گاهی چند ثانیه هنگام پیاده‌روی می‌ایستد.</string>
+    <string name="sec_setup">راه‌اندازی</string>
+    <string name="setup_guide">راهنمای تنظیم موقعیت ساختگی</string>
+    <string name="open_dev_options">باز کردن گزینه‌های توسعه‌دهنده</string>
+    <string name="open_location_settings">باز کردن تنظیمات موقعیت</string>
+    <string name="app_permissions">مجوزهای برنامه</string>
+    <string name="language">زبان</string>
+    <string name="sec_xiaomi">شیائومی / MIUI / HyperOS</string>
+    <string name="xiaomi_desc">برای ادامه‌ی شبیه‌سازی در پس‌زمینه: «شروع خودکار» را مجاز کنید، صرفه‌جویی باتری را روی «بدون محدودیت» بگذارید و اعلان‌ها و فعالیت پس‌زمینه را مجاز کنید. این دکمه‌ها فقط صفحه‌های سیستم را باز می‌کنند؛ انتخاب با شماست.</string>
+    <string name="autostart">شروع خودکار</string>
+    <string name="battery_opt">بهینه‌سازی باتری</string>
+    <string name="notif_settings">اعلان‌ها</string>
+    <string name="background_activity">فعالیت پس‌زمینه</string>
+
+    <string name="setup_title">راه‌اندازی موقعیت ساختگی</string>
+    <string name="setup_steps">۱. گزینه‌های توسعه‌دهنده را فعال کنید: تنظیمات > درباره‌ی گوشی > روی نسخه‌ی MIUI (یا شماره‌ی ساخت) هفت بار بزنید.\n۲. گزینه‌های توسعه‌دهنده > «انتخاب برنامه‌ی موقعیت ساختگی» را باز کنید و Mega GPS Simulator را انتخاب کنید.\n۳. هنگام درخواست، مجوز موقعیت (و اعلان) را بدهید.\n۴. موقعیت مکانی (GPS) را روشن کنید.\n۵. به اینجا برگردید و شبیه‌سازی را شروع کنید.</string>
+    <string name="status_permission">مجوز موقعیت داده شده</string>
+    <string name="status_mock">به‌عنوان برنامه‌ی موقعیت ساختگی انتخاب شده</string>
+    <string name="status_location_on">موقعیت مکانی (GPS) روشن است</string>
+    <string name="setup_limit">این برنامه هرگز موقعیت ساختگی را خودش فعال نمی‌کند و فقط به برنامه‌هایی که آن را بپذیرند داده‌ی موقعیت شبیه‌سازی‌شده می‌دهد.</string>
+
+    <string name="notif_channel">شبیه‌سازی</string>
+    <string name="notif_point">نگه داشتن یک موقعیت شبیه‌سازی‌شده</string>
+    <string name="notif_paused">متوقف‌شده</string>
+    <string name="notif_completed">مسیر تمام شد</string>
+    <string name="notif_route">شبیه‌سازی مسیر با سرعت %1$s کیلومتر بر ساعت · %2$d%%</string>
+
+    <string name="about_desc">شبیه‌سازی موقعیت GPS یا حرکت روی مسیر با قابلیت رسمی موقعیت ساختگی (Mock Location) اندروید. بدون نیاز به روت.</string>
+    <string name="about_limits_title">محدودیت‌ها</string>
+    <string name="about_limits">موقعیت ساختگی یک ابزار توسعه و تست است. برنامه‌ها می‌توانند موقعیت ساختگی را تشخیص دهند و ممکن است از Wi-Fi، آنتن موبایل، IP یا حسگرها هم استفاده کنند؛ بنابراین این برنامه نمی‌تواند موقعیت واقعی را از همه‌ی برنامه‌ها پنهان کند. اگر برنامه را Force Stop کنید یا اندروید سرویس را ببندد، شبیه‌سازی متوقف می‌شود و خودکار دوباره شروع نمی‌شود.</string>
+    <string name="about_privacy_title">حریم خصوصی</string>
+    <string name="about_privacy">موقعیت واقعی شما فقط با زدن «موقعیت واقعی» خوانده می‌شود و هرگز از دستگاه خارج نمی‌شود. جستجوی مکان فقط متنی را که تایپ می‌کنید می‌فرستد (OpenStreetMap Nominatim). مسیریابی آنلاین فقط نقاطی را که خودتان گذاشته‌اید می‌فرستد. تایل‌های نقشه از OpenStreetMap دانلود می‌شوند.</string>
+    <string name="about_osm">داده‌های نقشه © مشارکت‌کنندگان OpenStreetMap.</string>
+</resources>

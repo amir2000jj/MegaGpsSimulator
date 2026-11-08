@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Mega GPS Simulator</string>
+
+    <!-- tabs -->
+    <string name="tab_map">Map</string>
+    <string name="tab_planner">Planner</string>
+    <string name="tab_places">Places</string>
+    <string name="tab_routes">Routes</string>
+    <string name="tab_settings">Settings</string>
+    <string name="tab_about">About</string>
+
+    <!-- common -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
+    <string name="load">Load</string>
+    <string name="use">Use</string>
+    <string name="apply">Apply</string>
+    <string name="go">Go</string>
+    <string name="clear">Clear</string>
+    <string name="name">Name</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search a place or address</string>
+    <string name="points">points</string>
+    <string name="unit_m">m</string>
+    <string name="unit_km">km</string>
+    <string name="unit_kmh">km/h</string>
+
+    <!-- map / controls -->
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="start_here">Simulate here</string>
+    <string name="set_location">Set as simulated location</string>
+    <string name="start_route">Start route</string>
+    <string name="my_location">Real location</string>
+    <string name="save_favorite">Save favorite</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="restart">Restart</string>
+    <string name="reverse">Reverse</string>
+    <string name="speed">Speed</string>
+    <string name="heading">Heading</string>
+    <string name="total">Total</string>
+    <string name="traveled">Traveled</string>
+    <string name="remaining">Remaining</string>
+    <string name="eta">ETA</string>
+    <string name="walking_speed">Walking speed</string>
+    <string name="custom_speed">Custom speed</string>
+    <string name="mode_walking">Walking</string>
+    <string name="mode_running">Running</string>
+    <string name="mode_cycling">Cycling</string>
+    <string name="mode_driving">Driving</string>
+    <string name="mode_custom">Custom</string>
+    <string name="status_idle">Not simulating</string>
+    <string name="status_running">Simulating</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_completed">Route completed</string>
+    <string name="status_error">Simulation error</string>
+
+    <!-- warnings -->
+    <string name="warn_permission">Location permission is missing. Tap for setup.</string>
+    <string name="warn_mock">Mega GPS Simulator is not selected as the mock location app. Tap for setup.</string>
+    <string name="warn_location_off">Location (GPS) is turned off. Tap for setup.</string>
+    <string name="err_mock">Mock location is not allowed. Select this app under Developer options > Select mock location app.</string>
+    <string name="err_permission">Location permission is required to run the simulation service.</string>
+    <string name="err_foreground">Android did not allow the foreground service to start.</string>
+
+    <!-- messages -->
+    <string name="msg_invalid_coords">Invalid coordinates</string>
+    <string name="msg_no_results">No results</string>
+    <string name="msg_network_error">Network error</string>
+    <string name="msg_select_point">Select a point on the map first</string>
+    <string name="msg_need_two_points">At least two points are needed</string>
+    <string name="msg_need_location_permission">Location permission is required</string>
+    <string name="msg_real_while_sim">Real location is unavailable while a simulation is running</string>
+    <string name="msg_real_unavailable">Could not read the real location</string>
+    <string name="msg_route_failed">Could not get a route. Check your connection.</string>
+    <string name="msg_gpx_invalid">No usable route found in this GPX file</string>
+    <string name="msg_saved">Saved</string>
+
+    <!-- planner / lists -->
+    <string name="planner_hint">Tap the map to add points. Long-press a marker, then drag it to move it.</string>
+    <string name="import_gpx">Import GPX</string>
+    <string name="auto_route">Auto route (online)</string>
+    <string name="save_route">Save route</string>
+    <string name="use_route">Use route</string>
+    <string name="routed_note">Following an imported or online route. Editing points resets it to straight legs.</string>
+    <string name="start_point">Start</string>
+    <string name="destination">Destination</string>
+    <string name="waypoint">Waypoint</string>
+    <string name="no_places">No saved locations yet. Select a point on the map and tap “Save favorite”.</string>
+    <string name="no_routes">No saved routes yet. Build a route in the Planner and save it.</string>
+
+    <!-- settings -->
+    <string name="sec_simulation">Simulation</string>
+    <string name="update_interval">Location update interval</string>
+    <string name="human_walking">Human walking mode</string>
+    <string name="human_walking_desc">Small natural speed variations while walking. Position always stays on the route.</string>
+    <string name="random_pauses">Short random pauses</string>
+    <string name="random_pauses_desc">Occasionally stops for a few seconds while walking.</string>
+    <string name="sec_setup">Setup</string>
+    <string name="setup_guide">Mock location setup guide</string>
+    <string name="open_dev_options">Open Developer options</string>
+    <string name="open_location_settings">Open location settings</string>
+    <string name="app_permissions">App permissions</string>
+    <string name="language">Language</string>
+    <string name="sec_xiaomi">Xiaomi / MIUI / HyperOS</string>
+    <string name="xiaomi_desc">So the simulation keeps running in the background: allow Autostart, set Battery saver to “No restrictions”, allow notifications and background activity. These buttons only open the system screens; you make the choice.</string>
+    <string name="autostart">Autostart</string>
+    <string name="battery_opt">Battery optimization</string>
+    <string name="notif_settings">Notifications</string>
+    <string name="background_activity">Background activity</string>
+
+    <!-- setup dialog -->
+    <string name="setup_title">Mock location setup</string>
+    <string name="setup_steps">1. Enable Developer options: Settings > About phone > tap the OS / MIUI version (or Build number) 7 times.\n2. Open Developer options > “Select mock location app” and choose Mega GPS Simulator.\n3. Allow location (and notification) permission when asked.\n4. Turn Location (GPS) on.\n5. Come back here and start the simulation.</string>
+    <string name="status_permission">Location permission granted</string>
+    <string name="status_mock">Selected as mock location app</string>
+    <string name="status_location_on">Location (GPS) is on</string>
+    <string name="setup_limit">The app never enables mock location on its own. It only provides simulated location data to apps that accept it.</string>
+
+    <!-- notification -->
+    <string name="notif_channel">Simulation</string>
+    <string name="notif_point">Holding a simulated location</string>
+    <string name="notif_paused">Paused</string>
+    <string name="notif_completed">Route completed</string>
+    <string name="notif_route">Simulating route at %1$s km/h · %2$d%%</string>
+
+    <!-- about -->
+    <string name="about_desc">Simulate a GPS location or movement along a route using Android\'s official mock location feature. No root required.</string>
+    <string name="about_limits_title">Limitations</string>
+    <string name="about_limits">Mock location is a development / testing mechanism. Apps can detect mock locations and may also use Wi-Fi, cellular, IP or sensor signals, so this app cannot hide your real location from every app. The simulation stops if you force-stop the app or Android ends the service, and it never restarts by itself.</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy">Your real location is only read when you tap “Real location” and never leaves the device. Place search sends only the text you type (OpenStreetMap Nominatim). Online routing sends only the waypoints you placed. Map tiles are downloaded from OpenStreetMap.</string>
+    <string name="about_osm">Map data © OpenStreetMap contributors.</string>
+</resources>

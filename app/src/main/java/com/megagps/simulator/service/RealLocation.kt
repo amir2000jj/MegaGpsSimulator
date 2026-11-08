@@ -8,25 +8,28 @@ import android.os.Build
 import android.os.CancellationSignal
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
+import androidx.core.util.Consumer
 import com.megagps.simulator.domain.GeoPoint
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.function.Consumer
 import kotlin.coroutines.resume
 
-/** Reads the device's real position on explicit request. The result stays on the device. */
+/** Reads the device's real position on explicit request. */
 object RealLocation {
 
     @Suppress("DEPRECATION")
-    private fun isMock(location: Location): Boolean =
-        if (Build.VERSION.SDK_INT >= 31) {
+    private fun isMock(location: Location): Boolean {
+        return if (Build.VERSION.SDK_INT >= 31) {
             location.isMock
         } else {
             location.isFromMockProvider
         }
+    }
 
     @SuppressLint("MissingPermission")
     suspend fun get(ctx: Context): GeoPoint? {
-        val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val lm = ctx.getSystemService(
+            Context.LOCATION_SERVICE
+        ) as LocationManager
 
         val providers = listOf(
             LocationManager.GPS_PROVIDER,
@@ -34,25 +37,37 @@ object RealLocation {
             LocationManager.PASSIVE_PROVIDER
         )
 
+        // First check existing real location fixes.
         for (provider in providers) {
             val location = try {
                 lm.getLastKnownLocation(provider)
-            } catch (_: Exception) {
+            } catch (_: SecurityException) {
                 null
             }
 
             if (location != null && !isMock(location)) {
-                return GeoPoint(location.latitude, location.longitude)
+                return GeoPoint(
+                    location.latitude,
+                    location.longitude
+                )
             }
         }
 
+        // Request a fresh location if no cached real location exists.
         for (provider in listOf(
             LocationManager.GPS_PROVIDER,
             LocationManager.NETWORK_PROVIDER
         )) {
-            if (!lm.isProviderEnabled(provider)) continue
+            val enabled = try {
+                lm.isProviderEnabled(provider)
+            } catch (_: Exception) {
+                false
+            }
+
+            if (!enabled) continue
 
             val location: Location? = suspendCancellableCoroutine { continuation ->
+
                 val cancellationSignal = CancellationSignal()
 
                 continuation.invokeOnCancellation {
@@ -60,7 +75,8 @@ object RealLocation {
                 }
 
                 try {
-                    val executor = ContextCompat.getMainExecutor(ctx)
+                    val executor =
+                        ContextCompat.getMainExecutor(ctx)
 
                     val consumer = Consumer<Location> { result ->
                         if (continuation.isActive) {
@@ -76,6 +92,10 @@ object RealLocation {
                         consumer
                     )
 
+                } catch (_: SecurityException) {
+                    if (continuation.isActive) {
+                        continuation.resume(null)
+                    }
                 } catch (_: Exception) {
                     if (continuation.isActive) {
                         continuation.resume(null)
@@ -84,7 +104,10 @@ object RealLocation {
             }
 
             if (location != null && !isMock(location)) {
-                return GeoPoint(location.latitude, location.longitude)
+                return GeoPoint(
+                    location.latitude,
+                    location.longitude
+                )
             }
         }
 

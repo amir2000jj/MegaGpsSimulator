@@ -1,9 +1,11 @@
+
 package com.megagps.simulator.ui
 
 import android.app.Application
 import android.content.Context
 import android.location.LocationManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.AndroidViewModel
@@ -20,12 +22,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.Calendar
 import java.util.UUID
 
 data class UiState(
     val selected: GeoPoint? = null,
     val waypoints: List<GeoPoint> = emptyList(),
     val routed: List<GeoPoint>? = null,
+    val stops: List<Int> = emptyList(),
     val real: GeoPoint? = null,
     val focus: FocusRequest? = null,
     val results: List<PlaceResult> = emptyList(),
@@ -39,6 +44,7 @@ data class SetupStatus(
     val permission: Boolean = false,
     val mockSelected: Boolean = false,
     val locationEnabled: Boolean = true,
+    val wifiScan: Boolean = false,
 ) {
     val ready: Boolean get() = permission && mockSelected && locationEnabled
 }
@@ -65,8 +71,13 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             val point = repo.lastPoint.first()
-            val route = repo.lastRoute.first()
-            _ui.update { it.copy(selected = point, waypoints = route, focus = point?.let { p -> FocusRequest(listOf(p), 14.0) }) }
+            val draft = repo.lastRoute.first()
+            _ui.update {
+                it.copy(
+                    selected = point, waypoints = draft.waypoints, stops = draft.stops, routed = draft.routed,
+                    focus = point?.let { p -> FocusRequest(listOf(p), 14.0) },
+                )
+            }
         }
         refreshSetup()
     }
@@ -79,9 +90,17 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
             permission = hasLocationPermission(app),
             mockSelected = sim.value.isActive || MockLocationProvider(app).isAllowed(),
             locationEnabled = LocationManagerCompat.isLocationEnabled(lm),
+            wifiScan = isWifiScanOn(),
         )
         // A stale error banner disappears once the problem is fixed.
         if (sim.value.status == SimStatus.ERROR && _setup.value.ready) SimulationHub.state.value = SimState()
+    }
+
+    /** Best effort: Wi-Fi scanning can feed real positions to apps and cause jumps. Apps cannot change it. */
+    private fun isWifiScanOn(): Boolean = try {
+        Settings.Global.getInt(app.contentResolver, "wifi_scan_always_enabled", 0) == 1
+    } catch (e: Exception) {
+        false
     }
 
     /** Fresh check used right before starting. */
@@ -122,7 +141,16 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     fun pickResult(r: PlaceResult) = selectPoint(r.point, true)
 
     fun showRealLocation() {
-        if (sim.value.isActive) { toast(R.string.msg_real_while_sim); return }
+        if (sim.value.isActive) {
+            // While simulating, Android only reports the mock position, so show the position saved at start.
+            val saved = _ui.value.real
+            if (saved == null) toast(R.string.msg_real_while_sim)
+            else {
+                _ui.update { it.copy(focus = FocusRequest(listOf(saved), 16.0)) }
+                toast(R.string.msg_real_last)
+            }
+            return
+        }
         viewModelScope.launch {
             val p = RealLocation.get(app)
             if (p == null) toast(R.string.msg_real_unavailable)
@@ -132,39 +160,93 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // ---- route editing -------------------------------------------------------------------------
 
-    private fun setWaypoints(list: List<GeoPoint>, routed: List<GeoPoint>? = null, focus: Boolean = false) {
+    private fun setWaypoints(
+        list: List<GeoPoint>,
+        routed: List<GeoPoint>? = null,
+        focus: Boolean = false,
+        stops: List<Int> = List(list.size) { 0 },
+    ) {
         _ui.update {
-            it.copy(waypoints = list, routed = routed,
-                focus = if (focus) FocusRequest(routed ?: list) else it.focus)
+            it.copy(
+                waypoints = list, routed = routed, stops = stops,
+                focus = if (focus) FocusRequest(routed ?: list) else it.focus,
+            )
         }
-        viewModelScope.launch { repo.saveLastRoute(_ui.value.polyline) }
+        persistDraft()
     }
 
-    fun addWaypoint(p: GeoPoint) = setWaypoints(_ui.value.waypoints + p)
-    fun removeWaypoint(i: Int) = setWaypoints(_ui.value.waypoints.toMutableList().also { it.removeAt(i) })
-    fun moveWaypoint(i: Int, p: GeoPoint) = setWaypoints(_ui.value.waypoints.toMutableList().also { it[i] = p })
+    private fun persistDraft() {
+        val s = _ui.value
+        viewModelScope.launch { repo.saveLastRoute(RouteDraft(s.waypoints, s.stops, s.routed)) }
+    }
+
+    private fun stopsOf(s: UiState): List<Int> = List(s.waypoints.size) { s.stops.getOrElse(it) { 0 } }
+
+    fun addWaypoint(p: GeoPoint) {
+        val s = _ui.value
+        setWaypoints(s.waypoints + p, stops = stopsOf(s) + 0)
+    }
+
+    fun removeWaypoint(i: Int) {
+        val s = _ui.value
+        setWaypoints(
+            s.waypoints.toMutableList().also { it.removeAt(i) },
+            stops = stopsOf(s).toMutableList().also { it.removeAt(i) },
+        )
+    }
+
+    fun moveWaypoint(i: Int, p: GeoPoint) {
+        val s = _ui.value
+        setWaypoints(s.waypoints.toMutableList().also { it[i] = p }, stops = stopsOf(s))
+    }
+
     fun shiftWaypoint(i: Int, delta: Int) {
-        val l = _ui.value.waypoints.toMutableList()
+        val s = _ui.value
+        val l = s.waypoints.toMutableList()
+        val st = stopsOf(s).toMutableList()
         val j = i + delta
         if (j !in l.indices) return
         val t = l[i]; l[i] = l[j]; l[j] = t
-        setWaypoints(l)
+        val u = st[i]; st[i] = st[j]; st[j] = u
+        setWaypoints(l, stops = st)
     }
+
     fun clearRoute() = setWaypoints(emptyList())
+
     fun reverseRoute() {
         val s = _ui.value
-        setWaypoints(s.waypoints.reversed(), s.routed?.reversed())
+        setWaypoints(s.waypoints.reversed(), s.routed?.reversed(), stops = stopsOf(s).reversed())
+    }
+
+    /** Makes the last point equal to the first so the route becomes a loop. */
+    fun closeLoop() {
+        val s = _ui.value
+        if (s.waypoints.size < 2 || s.waypoints.first() == s.waypoints.last()) return
+        setWaypoints(
+            s.waypoints + s.waypoints.first(),
+            s.routed?.let { it + it.first() },
+            stops = stopsOf(s) + 0,
+        )
+    }
+
+    /** Seconds the traveller waits at waypoint [i] (0 = no stop). */
+    fun setStop(i: Int, seconds: Int) {
+        val s = _ui.value
+        if (i !in s.waypoints.indices) return
+        _ui.update { it.copy(stops = stopsOf(s).toMutableList().also { l -> l[i] = seconds.coerceIn(0, 3600) }) }
+        persistDraft()
     }
 
     /** Optional online routing between the user's waypoints. */
     fun fetchRoute() {
-        val wps = _ui.value.waypoints
+        val s0 = _ui.value
+        val wps = s0.waypoints
         if (wps.size < 2) { toast(R.string.msg_need_two_points); return }
         viewModelScope.launch {
             _ui.update { it.copy(busy = true) }
             try {
                 val geometry = routingService.route(wps, settings.value.mode)
-                setWaypoints(wps, geometry, focus = true)
+                setWaypoints(wps, geometry, focus = true, stops = stopsOf(s0))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -210,11 +292,23 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         val pts = _ui.value.polyline
         if (pts.size < 2) { toast(R.string.msg_need_two_points); return }
         val n = name.ifBlank { "Route ${savedRoutes.value.size + 1}" }
-        viewModelScope.launch { repo.saveRoutes(savedRoutes.value + SavedRoute(UUID.randomUUID().toString(), n, pts)) }
+        val s = _ui.value
+        viewModelScope.launch {
+            repo.saveRoutes(
+                savedRoutes.value + SavedRoute(UUID.randomUUID().toString(), n, pts, s.waypoints, stopsOf(s))
+            )
+        }
         toast(R.string.msg_saved)
     }
     fun deleteRoute(id: String) { viewModelScope.launch { repo.saveRoutes(savedRoutes.value.filter { it.id != id }) } }
-    fun loadRoute(r: SavedRoute) = applyPolyline(r.points)
+    fun loadRoute(r: SavedRoute) {
+        if (r.waypoints.size >= 2) {
+            val routed = if (r.points == r.waypoints) null else r.points
+            setWaypoints(r.waypoints, routed, focus = true, stops = List(r.waypoints.size) { r.stops.getOrElse(it) { 0 } })
+        } else {
+            applyPolyline(r.points) // route saved by an older version
+        }
+    }
 
     // ---- settings ------------------------------------------------------------------------------
 
@@ -235,12 +329,33 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     fun setInterval(ms: Long) = update { it.copy(intervalMs = ms) }
     fun setHuman(v: Boolean) = update { it.copy(humanWalking = v) }
     fun setPauses(v: Boolean) = update { it.copy(randomPauses = v) }
+    fun setTrafficEnabled(v: Boolean) = update { it.copy(trafficEnabled = v) }
+    fun setTrafficLevel(v: TrafficSetting) = update { it.copy(trafficLevel = v) }
+    fun setCustomVariation(v: Boolean) = update { it.copy(customVariation = v) }
+    fun setTheme(v: ThemeMode) = update { it.copy(themeMode = v) }
 
     // ---- simulation commands -------------------------------------------------------------------
 
-    private fun startSim(points: List<GeoPoint>) {
+    private fun startSim(points: List<GeoPoint>, stops: List<StopPoint> = emptyList()) {
         val s = settings.value
-        SimulationService.start(app, SimConfig(points, s.mode, s.speedOf(), s.humanWalking, s.randomPauses, s.intervalMs))
+        viewModelScope.launch {
+            // Once the simulation runs, Android reports only the mock position. So remember the real
+            // one first; "Real location" later shows it (the user's own view, never sent anywhere).
+            if (!sim.value.isActive && hasLocationPermission(app)) {
+                val real = withTimeoutOrNull(2500L) { RealLocation.get(app) }
+                if (real != null) _ui.update { it.copy(real = real) }
+            }
+            val cal = Calendar.getInstance()
+            val hour = cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.MINUTE) / 60.0
+            val traffic = TrafficPlanner.resolve(s.trafficEnabled, s.trafficLevel, hour)
+            SimulationService.start(
+                app,
+                SimConfig(
+                    points, s.mode, s.speedOf(), s.humanWalking, s.randomPauses, s.intervalMs,
+                    stops, traffic, s.customVariation,
+                ),
+            )
+        }
     }
 
     fun startPoint() {
@@ -249,8 +364,14 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun startRoute() {
-        val r = _ui.value.polyline
-        if (r.size < 2) toast(R.string.msg_need_two_points) else startSim(r)
+        val s = _ui.value
+        val r = s.polyline
+        if (r.size < 2) { toast(R.string.msg_need_two_points); return }
+        // Waiting is applied at every waypoint except the last one (arriving there ends the route).
+        val stops = s.waypoints.indices
+            .filter { it < s.waypoints.lastIndex && s.stops.getOrElse(it) { 0 } > 0 }
+            .map { StopPoint(s.waypoints[it], s.stops[it]) }
+        startSim(r, stops)
     }
 
     fun pause() = SimulationService.command(app, SimulationService.ACTION_PAUSE)

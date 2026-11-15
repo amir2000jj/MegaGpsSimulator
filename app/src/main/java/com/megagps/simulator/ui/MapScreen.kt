@@ -1,6 +1,6 @@
+
 package com.megagps.simulator.ui
 
-import androidx.compose.runtime.saveable.rememberSaveable
 import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -72,10 +73,14 @@ fun MapScreen(vm: MainViewModel, modifier: Modifier, onOpenSetup: () -> Unit) {
 
         Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SearchBox(vm, ui.results, ui.busy)
-            if (!setup.ready || sim.status == SimStatus.ERROR) {
+            val severe = !setup.ready || sim.status == SimStatus.ERROR
+            if (severe || setup.wifiScan) {
                 Card(
                     Modifier.fillMaxWidth().clickable { onOpenSetup() },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (severe) MaterialTheme.colorScheme.errorContainer
+                        else MaterialTheme.colorScheme.secondaryContainer,
+                    ),
                 ) {
                     Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         androidx.compose.material3.Icon(Icons.Filled.Warning, null)
@@ -101,7 +106,8 @@ private fun errorText(err: SimError, s: SetupStatus): Int = when {
     err == SimError.FOREGROUND_DENIED -> R.string.err_foreground
     !s.permission -> R.string.warn_permission
     !s.mockSelected -> R.string.warn_mock
-    else -> R.string.warn_location_off
+    !s.locationEnabled -> R.string.warn_location_off
+    else -> R.string.warn_wifi_scan
 }
 
 @Composable
@@ -208,6 +214,12 @@ private fun ControlPanel(
                             "${stringResource(R.string.heading)}: ${sim.headingDeg.toInt()}°",
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    if (sim.waitSeconds > 0) {
+                        Text(
+                            "${stringResource(R.string.waiting)}: ${sim.waitSeconds} ${stringResource(R.string.unit_s)}",
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     if (sim.isRoute) {
                         Text(
                             "${stringResource(R.string.total)}: ${distLabel(sim.totalM)}   ${stringResource(R.string.traveled)}: ${distLabel(sim.traveledM)}   " +
@@ -275,7 +287,7 @@ private fun SpeedSelector(vm: MainViewModel, settings: AppSettings) {
         )
     }
     if (mode == MoveMode.CUSTOM) {
-        var text by rememberSaveable(speed) { mutableStateOf(fmt(speed, 0)) }
+        var text by rememberSaveable(speed) { mutableStateOf(fmt(speed, 1)) }
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 text, { text = it }, Modifier.weight(1f), singleLine = true,

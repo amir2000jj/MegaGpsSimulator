@@ -1,3 +1,4 @@
+
 package com.megagps.simulator.domain
 
 import kotlin.math.*
@@ -61,6 +62,23 @@ class RoutePath(raw: List<GeoPoint>) {
         if (idx < 0) idx = -idx - 2
         return idx.coerceIn(0, points.size - 2)
     }
+
+    /**
+     * Index of the route vertex nearest to [p], scanning from vertex [fromIndex] on, so successive
+     * waypoints map to increasing positions even when the route passes the same spot twice (loops).
+     */
+    fun nearestVertex(p: GeoPoint, fromIndex: Int = 0): Int {
+        if (points.isEmpty()) return 0
+        var best = fromIndex.coerceIn(0, points.size - 1)
+        var bestD = Double.MAX_VALUE
+        for (i in best until points.size) {
+            val d = Geo.distance(points[i], p)
+            if (d < bestD - 1e-6) { bestD = d; best = i }
+        }
+        return best
+    }
+
+    fun distanceOfVertex(i: Int): Double = if (cum.isEmpty()) 0.0 else cum[i.coerceIn(0, cum.size - 1)]
 
     fun pointAt(d: Double): GeoPoint {
         if (points.size == 1) return points[0]

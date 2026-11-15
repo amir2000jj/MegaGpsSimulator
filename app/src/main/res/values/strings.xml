@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Mega GPS Simulator</string>
@@ -138,4 +139,30 @@
     <string name="about_privacy_title">Privacy</string>
     <string name="about_privacy">Your real location is only read when you tap “Real location” and never leaves the device. Place search sends only the text you type (OpenStreetMap Nominatim). Online routing sends only the waypoints you placed. Map tiles are downloaded from OpenStreetMap.</string>
     <string name="about_osm">Map data © OpenStreetMap contributors.</string>
+
+    <!-- v1.1 additions -->
+    <string name="unit_s">s</string>
+    <string name="unit_s_long">Seconds</string>
+    <string name="waiting">Waiting</string>
+    <string name="stop_duration">Stop duration (seconds)</string>
+    <string name="stop_add">+ Add stop</string>
+    <string name="stop_set">Stop: %1$d s</string>
+    <string name="close_loop">Close loop</string>
+    <string name="msg_real_last">Showing your real location saved when the simulation started</string>
+    <string name="warn_wifi_scan">Tip: Wi-Fi scanning is on and can make the simulated location jump. Tap for details.</string>
+    <string name="status_wifi_off">Wi-Fi scanning is off (prevents jumps)</string>
+    <string name="setup_accuracy_tip">Also turn off Google Location Accuracy (Settings > Location > Location services). Android does not let apps change Wi-Fi scanning or Google Location Accuracy for you, so do it by hand.</string>
+    <string name="custom_variation">Natural variation for custom speed</string>
+    <string name="custom_variation_desc">Custom speed varies slightly up and down (about ±15%), like a real traveller.</string>
+    <string name="sec_traffic">Traffic (driving only)</string>
+    <string name="traffic_enable">Simulate traffic</string>
+    <string name="traffic_desc">Simulated congestion on the route, not live data. Speed drops in some sections and heavy traffic sometimes stops and goes.</string>
+    <string name="traffic_auto">Auto (time of day)</string>
+    <string name="traffic_low">Light</string>
+    <string name="traffic_medium">Medium</string>
+    <string name="traffic_high">Heavy</string>
+    <string name="sec_appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>

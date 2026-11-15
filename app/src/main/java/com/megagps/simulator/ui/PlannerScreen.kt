@@ -1,3 +1,4 @@
+
 package com.megagps.simulator.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +21,7 @@ import com.megagps.simulator.domain.Geo
 fun PlannerScreen(vm: MainViewModel, modifier: Modifier, onGoMap: () -> Unit) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     var showSave by remember { mutableStateOf(false) }
+    var stopIndex by remember { mutableStateOf<Int?>(null) }
     // GPX files come through the system picker, so no storage permission is needed.
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let { vm.importGpx(it) } }
 
@@ -47,6 +49,10 @@ fun PlannerScreen(vm: MainViewModel, modifier: Modifier, onGoMap: () -> Unit) {
                     Text(stringResource(R.string.auto_route))
                 }
                 OutlinedButton(onClick = { vm.reverseRoute() }, enabled = ui.waypoints.size >= 2) { Text(stringResource(R.string.reverse)) }
+                OutlinedButton(
+                    onClick = { vm.closeLoop() },
+                    enabled = ui.waypoints.size >= 2 && ui.waypoints.first() != ui.waypoints.last(),
+                ) { Text(stringResource(R.string.close_loop)) }
                 OutlinedButton(onClick = { vm.clearRoute() }, enabled = ui.waypoints.isNotEmpty()) { Text(stringResource(R.string.clear)) }
                 OutlinedButton(onClick = { showSave = true }, enabled = ui.polyline.size >= 2) { Text(stringResource(R.string.save_route)) }
                 Button(onClick = onGoMap, enabled = ui.polyline.size >= 2) { Text(stringResource(R.string.use_route)) }
@@ -64,6 +70,15 @@ fun PlannerScreen(vm: MainViewModel, modifier: Modifier, onGoMap: () -> Unit) {
                         Column(Modifier.weight(1f)) {
                             Text(label, style = MaterialTheme.typography.bodyMedium)
                             Text("${fmt(p.lat, 5)}, ${fmt(p.lon, 5)}", style = MaterialTheme.typography.bodySmall)
+                            if (i < ui.waypoints.lastIndex) {
+                                val secs = ui.stops.getOrElse(i) { 0 }
+                                TextButton(onClick = { stopIndex = i }, contentPadding = PaddingValues(horizontal = 4.dp)) {
+                                    Text(
+                                        if (secs > 0) stringResource(R.string.stop_set, secs) else stringResource(R.string.stop_add),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
                         }
                         TextButton(onClick = { vm.shiftWaypoint(i, -1) }, enabled = i > 0) { Text("▲") }
                         TextButton(onClick = { vm.shiftWaypoint(i, 1) }, enabled = i < ui.waypoints.lastIndex) { Text("▼") }
@@ -72,6 +87,9 @@ fun PlannerScreen(vm: MainViewModel, modifier: Modifier, onGoMap: () -> Unit) {
                 }
             }
         }
+    }
+    stopIndex?.let { i ->
+        NumberDialog(R.string.stop_duration, ui.stops.getOrElse(i) { 0 }, { stopIndex = null }) { vm.setStop(i, it) }
     }
     if (showSave) NameDialog(R.string.save_route, "", { showSave = false }) { vm.saveRoute(it) }
 }

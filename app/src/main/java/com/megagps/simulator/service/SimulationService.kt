@@ -1,3 +1,4 @@
+
 package com.megagps.simulator.service
 
 import android.app.*
@@ -98,7 +99,17 @@ class SimulationService : Service() {
     private fun buildEngine() {
         val c = config ?: return
         if (c.points.size >= 2) {
-            engine = MovementEngine(RoutePath(c.points), c.mode, c.speedKmh, c.humanWalking, c.randomPauses)
+            val path = RoutePath(c.points)
+            // Map each stop to a position along the route, in waypoint order (works for loops too).
+            var idx = 0
+            val stops = c.stops.map { sp ->
+                idx = path.nearestVertex(sp.point, idx)
+                StopAt(path.distanceOfVertex(idx), sp.seconds.toDouble())
+            }
+            engine = MovementEngine(
+                path, c.mode, c.speedKmh, c.humanWalking, c.randomPauses,
+                stops, c.traffic, c.customVariation,
+            )
             holdPoint = null
         } else {
             engine = null
@@ -135,13 +146,14 @@ class SimulationService : Service() {
             else -> SimStatus.RUNNING
         }
         val eta = if (e != null && sample != null && status == SimStatus.RUNNING)
-            System.currentTimeMillis() + (sample.remainingM / max(0.3, e.speedKmh / 3.6) * 1000).toLong()
+            System.currentTimeMillis() + (sample.remainingM / max(0.02, e.speedKmh / 3.6) * 1000).toLong()
         else null
         SimulationHub.state.value = SimState(
             status = status, isRoute = e != null, lat = point.lat, lon = point.lon,
             speedKmh = speed * 3.6, headingDeg = heading,
             totalM = sample?.totalM ?: 0.0, traveledM = sample?.traveledM ?: 0.0,
             remainingM = sample?.remainingM ?: 0.0, etaEpochMs = eta, reversed = e?.direction == -1,
+            waitSeconds = kotlin.math.ceil(sample?.waitSeconds ?: 0.0).toInt(),
         )
 
         val now = SystemClock.elapsedRealtime()

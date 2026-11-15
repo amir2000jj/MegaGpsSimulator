@@ -1,6 +1,8 @@
+
 package com.megagps.simulator.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -46,7 +48,8 @@ fun OsmMap(
     onWaypointMoved: (Int, GeoPoint) -> Unit = { _, _ -> },
 ) {
     val ctx = LocalContext.current
-    val dark = isSystemInDarkTheme()
+    // Follows the app theme (system, light or dark), not just the phone setting.
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val tap = rememberUpdatedState(onTap)
     val moved = rememberUpdatedState(onWaypointMoved)
 

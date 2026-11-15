@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Mega GPS Simulator</string>
@@ -128,4 +129,30 @@
     <string name="about_privacy_title">حریم خصوصی</string>
     <string name="about_privacy">موقعیت واقعی شما فقط با زدن «موقعیت واقعی» خوانده می‌شود و هرگز از دستگاه خارج نمی‌شود. جستجوی مکان فقط متنی را که تایپ می‌کنید می‌فرستد (OpenStreetMap Nominatim). مسیریابی آنلاین فقط نقاطی را که خودتان گذاشته‌اید می‌فرستد. تایل‌های نقشه از OpenStreetMap دانلود می‌شوند.</string>
     <string name="about_osm">داده‌های نقشه © مشارکت‌کنندگان OpenStreetMap.</string>
+
+    <!-- v1.1 additions -->
+    <string name="unit_s">ثانیه</string>
+    <string name="unit_s_long">ثانیه</string>
+    <string name="waiting">در حال انتظار</string>
+    <string name="stop_duration">مدت توقف (ثانیه)</string>
+    <string name="stop_add">+ افزودن توقف</string>
+    <string name="stop_set">توقف: %1$d ثانیه</string>
+    <string name="close_loop">بستن حلقه</string>
+    <string name="msg_real_last">موقعیت واقعی شما که هنگام شروع شبیه‌سازی ذخیره شد نمایش داده می‌شود</string>
+    <string name="warn_wifi_scan">نکته: جستجوی Wi-Fi روشن است و می‌تواند باعث پرش موقعیت شبیه‌سازی‌شده شود. برای جزئیات لمس کنید.</string>
+    <string name="status_wifi_off">جستجوی Wi-Fi خاموش است (از پرش جلوگیری می‌کند)</string>
+    <string name="setup_accuracy_tip">«دقت موقعیت گوگل» (Google Location Accuracy) را هم خاموش کنید (تنظیمات > موقعیت مکانی > خدمات موقعیت). اندروید اجازه نمی‌دهد برنامه‌ها جستجوی Wi-Fi یا دقت موقعیت گوگل را عوض کنند؛ پس باید دستی انجام شود.</string>
+    <string name="custom_variation">تغییر طبیعی برای سرعت دلخواه</string>
+    <string name="custom_variation_desc">سرعت دلخواه کمی بالا و پایین می‌شود (حدود ±۱۵٪) مثل یک مسافر واقعی.</string>
+    <string name="sec_traffic">ترافیک (فقط رانندگی)</string>
+    <string name="traffic_enable">شبیه‌سازی ترافیک</string>
+    <string name="traffic_desc">ترافیک شبیه‌سازی‌شده روی مسیر است، نه داده‌ی زنده. در بخش‌هایی سرعت کم می‌شود و در ترافیک سنگین گاهی توقف و حرکت دارد.</string>
+    <string name="traffic_auto">خودکار (بر اساس ساعت)</string>
+    <string name="traffic_low">سبک</string>
+    <string name="traffic_medium">متوسط</string>
+    <string name="traffic_high">سنگین</string>
+    <string name="sec_appearance">ظاهر برنامه</string>
+    <string name="theme_system">مطابق سیستم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تیره</string>
 </resources>

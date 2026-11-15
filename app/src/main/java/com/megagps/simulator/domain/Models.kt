@@ -1,3 +1,4 @@
+
 package com.megagps.simulator.domain
 
 /** A plain geographic coordinate (WGS84). Real and simulated coordinates never share a type with I/O code. */
@@ -14,12 +15,35 @@ enum class MoveMode(val presetsKmh: List<Double>, val defaultKmh: Double, val ac
 
     fun clampSpeed(kmh: Double): Double = when (this) {
         WALKING -> kmh.coerceIn(2.0, 6.0)
+        CUSTOM -> kmh.coerceIn(0.1, 300.0) // custom speed may be very slow
         else -> kmh.coerceIn(1.0, 300.0)
     }
 }
 
 data class SavedPlace(val id: String, val name: String, val point: GeoPoint)
-data class SavedRoute(val id: String, val name: String, val points: List<GeoPoint>)
+/** A waypoint where the traveller waits [seconds] before continuing. */
+data class StopPoint(val point: GeoPoint, val seconds: Int)
+
+/**
+ * Route being edited. [stops] has the same size as [waypoints] (seconds to wait at each one, 0 = none).
+ * [routed] is an imported/online polyline that is followed instead of straight legs.
+ */
+data class RouteDraft(
+    val waypoints: List<GeoPoint> = emptyList(),
+    val stops: List<Int> = emptyList(),
+    val routed: List<GeoPoint>? = null,
+)
+
+/** [points] is the polyline that is simulated; [waypoints]/[stops] allow editing it again later. */
+data class SavedRoute(
+    val id: String,
+    val name: String,
+    val points: List<GeoPoint>,
+    val waypoints: List<GeoPoint> = emptyList(),
+    val stops: List<Int> = emptyList(),
+)
+
+enum class TrafficSetting { LOW, MEDIUM, HIGH, AUTO }
 
 data class AppSettings(
     val mode: MoveMode = MoveMode.WALKING,
@@ -27,6 +51,9 @@ data class AppSettings(
     val intervalMs: Long = 1000L,
     val humanWalking: Boolean = true,
     val randomPauses: Boolean = false,
+    val trafficEnabled: Boolean = false,
+    val trafficLevel: TrafficSetting = TrafficSetting.AUTO,
+    val customVariation: Boolean = true,
 ) {
     fun speedOf(m: MoveMode = mode): Double = m.clampSpeed(speeds[m] ?: m.defaultKmh)
 }
@@ -39,6 +66,9 @@ data class SimConfig(
     val humanWalking: Boolean,
     val randomPauses: Boolean,
     val intervalMs: Long,
+    val stops: List<StopPoint> = emptyList(),
+    val traffic: Traffic = Traffic.OFF,
+    val customVariation: Boolean = true,
 )
 
 enum class SimStatus { IDLE, RUNNING, PAUSED, COMPLETED, ERROR }
@@ -56,6 +86,7 @@ data class SimState(
     val remainingM: Double = 0.0,
     val etaEpochMs: Long? = null,
     val reversed: Boolean = false,
+    val waitSeconds: Int = 0,
     val error: SimError = SimError.NONE,
 ) {
     val isActive: Boolean

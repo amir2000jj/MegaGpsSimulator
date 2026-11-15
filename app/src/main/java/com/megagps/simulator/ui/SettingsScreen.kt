@@ -1,3 +1,4 @@
+
 package com.megagps.simulator.ui
 
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.megagps.simulator.R
+import com.megagps.simulator.domain.ThemeMode
+import com.megagps.simulator.domain.TrafficSetting
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -20,6 +23,17 @@ fun SettingsScreen(vm: MainViewModel, modifier: Modifier, onOpenSetup: () -> Uni
     val ctx = LocalContext.current
 
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Section(R.string.sec_appearance) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ThemeMode.values().forEach { m ->
+                    FilterChip(
+                        selected = s.themeMode == m, onClick = { vm.setTheme(m) },
+                        label = { Text(stringResource(themeRes(m))) },
+                    )
+                }
+            }
+        }
+
         Section(R.string.sec_simulation) {
             Text(stringResource(R.string.update_interval), style = MaterialTheme.typography.bodyMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -30,6 +44,21 @@ fun SettingsScreen(vm: MainViewModel, modifier: Modifier, onOpenSetup: () -> Uni
             Spacer(Modifier.height(8.dp))
             SwitchRow(R.string.human_walking, R.string.human_walking_desc, s.humanWalking) { vm.setHuman(it) }
             SwitchRow(R.string.random_pauses, R.string.random_pauses_desc, s.randomPauses) { vm.setPauses(it) }
+            SwitchRow(R.string.custom_variation, R.string.custom_variation_desc, s.customVariation) { vm.setCustomVariation(it) }
+        }
+
+        Section(R.string.sec_traffic) {
+            SwitchRow(R.string.traffic_enable, R.string.traffic_desc, s.trafficEnabled) { vm.setTrafficEnabled(it) }
+            if (s.trafficEnabled) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TrafficSetting.values().forEach { t ->
+                        FilterChip(
+                            selected = s.trafficLevel == t, onClick = { vm.setTrafficLevel(t) },
+                            label = { Text(stringResource(trafficRes(t))) },
+                        )
+                    }
+                }
+            }
         }
 
         Section(R.string.sec_setup) {
@@ -53,6 +82,19 @@ fun SettingsScreen(vm: MainViewModel, modifier: Modifier, onOpenSetup: () -> Uni
             }
         }
     }
+}
+
+private fun themeRes(m: ThemeMode): Int = when (m) {
+    ThemeMode.SYSTEM -> R.string.theme_system
+    ThemeMode.LIGHT -> R.string.theme_light
+    ThemeMode.DARK -> R.string.theme_dark
+}
+
+private fun trafficRes(t: TrafficSetting): Int = when (t) {
+    TrafficSetting.LOW -> R.string.traffic_low
+    TrafficSetting.MEDIUM -> R.string.traffic_medium
+    TrafficSetting.HIGH -> R.string.traffic_high
+    TrafficSetting.AUTO -> R.string.traffic_auto
 }
 
 @Composable

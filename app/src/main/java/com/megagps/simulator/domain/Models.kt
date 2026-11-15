@@ -45,6 +45,9 @@ data class SavedRoute(
 
 enum class TrafficSetting { LOW, MEDIUM, HIGH, AUTO }
 
+/** App theme: follow the phone, or force light / dark. */
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
 data class AppSettings(
     val mode: MoveMode = MoveMode.WALKING,
     val speeds: Map<MoveMode, Double> = emptyMap(),
@@ -54,6 +57,7 @@ data class AppSettings(
     val trafficEnabled: Boolean = false,
     val trafficLevel: TrafficSetting = TrafficSetting.AUTO,
     val customVariation: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 ) {
     fun speedOf(m: MoveMode = mode): Double = m.clampSpeed(speeds[m] ?: m.defaultKmh)
 }

@@ -1,5 +1,4 @@
 
-
 package com.megagps.simulator.data
 
 import android.content.Context
@@ -27,6 +26,7 @@ class Repository(context: Context) {
         val TRAFFIC_ON = booleanPreferencesKey("traffic_on")
         val TRAFFIC_LEVEL = stringPreferencesKey("traffic_level")
         val CUSTOM_VAR = booleanPreferencesKey("custom_variation")
+        val THEME = stringPreferencesKey("theme_mode")
         val LAST_POINT = stringPreferencesKey("last_point")
         val LAST_ROUTE = stringPreferencesKey("last_route")
         val PLACES = stringPreferencesKey("places")
@@ -45,6 +45,7 @@ class Repository(context: Context) {
             trafficLevel = p[K.TRAFFIC_LEVEL]?.let { runCatching { TrafficSetting.valueOf(it) }.getOrNull() }
                 ?: TrafficSetting.AUTO,
             customVariation = p[K.CUSTOM_VAR] ?: true,
+            themeMode = p[K.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
         )
     }
 
@@ -58,6 +59,7 @@ class Repository(context: Context) {
             p[K.TRAFFIC_ON] = next.trafficEnabled
             p[K.TRAFFIC_LEVEL] = next.trafficLevel.name
             p[K.CUSTOM_VAR] = next.customVariation
+            p[K.THEME] = next.themeMode.name
             next.speeds.forEach { (m, v) -> p[K.speed(m)] = v }
         }
     }

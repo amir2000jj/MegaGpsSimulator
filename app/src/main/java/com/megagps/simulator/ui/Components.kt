@@ -1,16 +1,18 @@
+
 package com.megagps.simulator.ui
 
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.megagps.simulator.R
-
 
 @Composable
 fun NameDialog(titleRes: Int, initial: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
@@ -25,6 +27,29 @@ fun NameDialog(titleRes: Int, initial: String, onDismiss: () -> Unit, onConfirm:
             )
         },
         confirmButton = { TextButton(onClick = { onConfirm(name); onDismiss() }) { Text(stringResource(R.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+}
+
+/** Asks for a whole number of seconds (0 removes the stop). */
+@Composable
+fun NumberDialog(titleRes: Int, initial: Int, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
+    var text by rememberSaveable { mutableStateOf(if (initial > 0) initial.toString() else "") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(titleRes)) },
+        text = {
+            OutlinedTextField(
+                value = text, onValueChange = { text = it }, singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text(stringResource(R.string.unit_s_long)) },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(parseNum(text)?.toInt()?.coerceIn(0, 3600) ?: 0); onDismiss() }) {
+                Text(stringResource(R.string.save))
+            }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
@@ -63,6 +88,8 @@ fun SetupDialog(vm: MainViewModel, onClose: () -> Unit) {
                 Text(mark(setup.permission) + stringResource(R.string.status_permission))
                 Text(mark(setup.mockSelected) + stringResource(R.string.status_mock))
                 Text(mark(setup.locationEnabled) + stringResource(R.string.status_location_on))
+                Text(mark(!setup.wifiScan) + stringResource(R.string.status_wifi_off))
+                Text(stringResource(R.string.setup_accuracy_tip), style = MaterialTheme.typography.bodySmall)
                 Text(stringResource(R.string.setup_limit), style = MaterialTheme.typography.bodySmall)
                 if (!setup.locationEnabled) TextButton(onClick = { SystemIntents.locationSettings(ctx) }) {
                     Text(stringResource(R.string.open_location_settings))

@@ -4,17 +4,6 @@ Simulate a GPS location, or movement along a route, on Android **without root**,
 official *mock location* mechanism (`LocationManager` test providers).
 Kotlin · Jetpack Compose · Material 3 · Foreground Service · Coroutines/Flow · DataStore · osmdroid (OpenStreetMap).
 
-## Build the APK on GitHub (no Android Studio needed)
-1. Create a new GitHub repository and upload **all** files of this folder (including the hidden `.github` folder).
-2. Push to `main` (or open the **Actions** tab > *Build APK* > **Run workflow**).
-3. When the run finishes, open it and download the artifact **MegaGPSSimulator-debug-apk** (a zip containing `app-debug.apk`).
-4. Copy the APK to the phone and install it (allow "install unknown apps" for your file manager/browser).
-
-## Build locally
-- Android Studio (Koala or newer) > *Open* this folder > *Run*. Or from a terminal with JDK 17 and Gradle 8.9+:
-  `gradle :app:assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`
-- To create the Gradle wrapper once: `gradle wrapper --gradle-version 8.9`
-
 ## First-time setup on the phone
 1. Settings > About phone > tap the OS / MIUI version 7 times (enables Developer options).
 2. Developer options > **Select mock location app** > *Mega GPS Simulator*.

@@ -1,4 +1,3 @@
-
 package com.megagps.simulator.service
 
 import android.app.*
@@ -62,6 +61,7 @@ class SimulationService : Service() {
             ACTION_RESUME -> setPaused(false)
             ACTION_STOP -> shutdown()
             ACTION_RESTART -> restart()
+            ACTION_UPDATE_ROUTE -> updateRoute()
             ACTION_REVERSE -> { engine?.reverse(); tick(0.0) }
             ACTION_SPEED -> {
                 val m = runCatching { MoveMode.valueOf(intent?.getStringExtra(EXTRA_MODE) ?: "") }.getOrNull()
@@ -114,6 +114,22 @@ class SimulationService : Service() {
         } else {
             engine = null
             holdPoint = c.points.first()
+        }
+    }
+
+    /** The user added points to the end of the running route: keep going to them. */
+    private fun updateRoute() {
+        val u = SimulationHub.pendingUpdate ?: return
+        val e = engine ?: return
+        val newPath = RoutePath(u.points)
+        var idx = 0
+        val stops = u.stops.map { sp ->
+            idx = newPath.nearestVertex(sp.point, idx)
+            StopAt(newPath.distanceOfVertex(idx), sp.seconds.toDouble())
+        }
+        if (e.updateRoute(newPath, stops)) {
+            config = config?.copy(points = u.points, stops = u.stops) // Restart uses the extended route too
+            tick(0.0)
         }
     }
 
@@ -268,12 +284,18 @@ class SimulationService : Service() {
         const val ACTION_RESTART = "com.megagps.simulator.RESTART"
         const val ACTION_REVERSE = "com.megagps.simulator.REVERSE"
         const val ACTION_SPEED = "com.megagps.simulator.SPEED"
+        const val ACTION_UPDATE_ROUTE = "com.megagps.simulator.UPDATE_ROUTE"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_SPEED = "speed"
 
         fun start(ctx: Context, cfg: SimConfig) {
             SimulationHub.pending = cfg
             ContextCompat.startForegroundService(ctx, Intent(ctx, SimulationService::class.java).setAction(ACTION_START))
+        }
+
+        fun updateRoute(ctx: Context, update: RouteUpdate) {
+            SimulationHub.pendingUpdate = update
+            command(ctx, ACTION_UPDATE_ROUTE)
         }
 
         fun command(ctx: Context, action: String, mode: MoveMode? = null, kmh: Double? = null) {

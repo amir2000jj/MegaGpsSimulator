@@ -1,4 +1,3 @@
-
 package com.megagps.simulator.domain
 
 /** A plain geographic coordinate (WGS84). Real and simulated coordinates never share a type with I/O code. */
@@ -42,6 +41,9 @@ data class SavedRoute(
     val waypoints: List<GeoPoint> = emptyList(),
     val stops: List<Int> = emptyList(),
 )
+
+/** New route sent to a running simulation. Only points appended at the end are applied live. */
+data class RouteUpdate(val points: List<GeoPoint>, val stops: List<StopPoint>)
 
 enum class TrafficSetting { LOW, MEDIUM, HIGH, AUTO }
 

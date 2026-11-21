@@ -112,4 +112,26 @@ class MovementEngineTest {
         while (!e.completed && n < 2000) { e.step(1.0); n++ }
         assertTrue(e.completed)
     }
+
+    @Test fun extendingRouteMakesFinishedTravellerContinue() {
+        val first = listOf(GeoPoint(35.0, 51.0), GeoPoint(35.0018, 51.0)) // ~200 m
+        val e = MovementEngine(RoutePath(first), MoveMode.CYCLING, 20.0, human = false, pauses = false)
+        var n = 0
+        while (!e.completed && n < 2000) { e.step(1.0); n++ }
+        assertTrue(e.completed)
+        val longer = first + GeoPoint(35.0036, 51.0) // another ~200 m north
+        assertTrue(e.updateRoute(RoutePath(longer), emptyList()))
+        assertFalse(e.completed)
+        n = 0
+        while (!e.completed && n < 2000) { e.step(1.0); n++ }
+        assertTrue(e.completed)
+        assertEquals(RoutePath(longer).total, e.snapshot().traveledM, 5.0)
+    }
+
+    @Test fun changedRouteIsNotAppliedWhileRunning() {
+        val first = listOf(GeoPoint(35.0, 51.0), GeoPoint(35.0018, 51.0))
+        val e = MovementEngine(RoutePath(first), MoveMode.CYCLING, 20.0, human = false, pauses = false)
+        val other = listOf(GeoPoint(35.0, 51.0), GeoPoint(35.0, 51.002))
+        assertFalse(e.updateRoute(RoutePath(other), emptyList()))
+    }
 }

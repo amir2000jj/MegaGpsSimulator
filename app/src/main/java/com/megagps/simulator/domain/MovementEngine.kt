@@ -1,4 +1,3 @@
-
 package com.megagps.simulator.domain
 
 import kotlin.math.*
@@ -21,7 +20,7 @@ data class StopAt(val distance: Double, val seconds: Double)
  * inside generated congested zones (DRIVING only).
  */
 class MovementEngine(
-    val path: RoutePath,
+    path: RoutePath,
     mode: MoveMode,
     speedKmh: Double,
     private val human: Boolean,
@@ -51,6 +50,10 @@ class MovementEngine(
     var completed: Boolean = false
         private set
 
+    /** The route being followed. It can be extended while running, see [updateRoute]. */
+    var path: RoutePath = path
+        private set
+
     private var distance = 0.0
     private var odometer = 0.0 // cumulative distance actually travelled (all directions)
     private var currentSpeed = 0.0
@@ -60,9 +63,9 @@ class MovementEngine(
     private var crawlLeft = 0.0
     private var dwellLeft = 0.0
 
-    private val stopList: List<StopAt> = stops.filter { it.seconds > 0.0 }.sortedBy { it.distance }
-    private val stopDone = BooleanArray(stopList.size)
-    private val zones: List<CongestionZone> = TrafficPlanner.generateZones(path.total, traffic, rnd)
+    private var stopList: List<StopAt> = stops.filter { it.seconds > 0.0 }.sortedBy { it.distance }
+    private var stopDone = BooleanArray(stopList.size)
+    private var zones: List<CongestionZone> = TrafficPlanner.generateZones(path.total, traffic, rnd)
 
     init {
         // A stop at the very start means: wait there before moving.
@@ -78,6 +81,40 @@ class MovementEngine(
     fun setSpeed(mode: MoveMode, kmh: Double) {
         this.mode = mode
         this.speedKmh = mode.clampSpeed(kmh)
+    }
+
+    /**
+     * Applies an edited route to a running engine. Only accepted when [newPath] starts with exactly the
+     * points of the current route (points were appended at the end, or nothing changed): the current
+     * position stays valid, and a traveller that had already finished continues to the new end.
+     * Returns false when the route was changed in any other way (it is then ignored).
+     */
+    fun updateRoute(newPath: RoutePath, newStops: List<StopAt>): Boolean {
+        val old = path.points
+        val np = newPath.points
+        if (np.size < old.size) return false
+        for (i in old.indices) if (np[i] != old[i]) return false
+
+        if (np.size > old.size) {
+            val oldTotal = path.total
+            path = newPath
+            // Traffic for the new stretch only; the part already generated is kept.
+            val extra = TrafficPlanner.generateZones(path.total - oldTotal, traffic, rnd)
+                .map { it.copy(start = it.start + oldTotal, end = it.end + oldTotal) }
+            zones = zones + extra
+            if (completed && direction > 0 && path.total - distance > 0.5) completed = false
+        }
+        applyStops(newStops)
+        return true
+    }
+
+    /** Replaces the stops; those already passed (in the current direction) are not repeated. */
+    private fun applyStops(list: List<StopAt>) {
+        stopList = list.filter { it.seconds > 0.0 }.sortedBy { it.distance }
+        stopDone = BooleanArray(stopList.size) { i ->
+            val d = stopList[i].distance
+            if (direction > 0) d <= distance + 0.3 else d >= distance - 0.3
+        }
     }
 
     /** Reverses travel direction. Returns false when there is no room to move that way. */

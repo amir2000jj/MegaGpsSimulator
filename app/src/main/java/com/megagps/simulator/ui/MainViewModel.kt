@@ -1,4 +1,3 @@
-
 package com.megagps.simulator.ui
 
 import android.app.Application
@@ -58,6 +57,10 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     val places = repo.places.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val savedRoutes = repo.routes.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val sim = SimulationHub.state
+
+    /** Route the running simulation currently follows (to detect points added at its end). */
+    private var simPoints: List<GeoPoint> = emptyList()
+    private var simStops: List<StopPoint> = emptyList()
 
     private val _ui = MutableStateFlow(UiState())
     val ui: StateFlow<UiState> = _ui
@@ -173,7 +176,36 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
             )
         }
         persistDraft()
+        syncRouteToSimulation()
     }
+
+    /**
+     * While a route simulation runs, points added at the END of the plan are sent to it so it keeps
+     * going. Any other change of the running route is not applied until it is started again.
+     */
+    private fun syncRouteToSimulation() {
+        val st = sim.value
+        if (!st.isActive || !st.isRoute || simPoints.isEmpty()) return
+        val s = _ui.value
+        val newPts = s.polyline
+        val newStops = routeStops(s)
+        if (newPts == simPoints && newStops == simStops) return
+        val extendsOld = newPts.size >= simPoints.size && newPts.subList(0, simPoints.size) == simPoints
+        if (!extendsOld) {
+            // Tell the user only when they edit the running route itself, not when planning a new one.
+            if (newPts.isNotEmpty() && newPts.first() == simPoints.first()) toast(R.string.msg_live_edit_limit)
+            return
+        }
+        val grew = newPts.size > simPoints.size
+        simPoints = newPts
+        simStops = newStops
+        SimulationService.updateRoute(app, RouteUpdate(newPts, newStops))
+        if (grew) toast(R.string.msg_route_extended)
+    }
+
+    private fun routeStops(s: UiState): List<StopPoint> = s.waypoints.indices
+        .filter { it < s.waypoints.lastIndex && s.stops.getOrElse(it) { 0 } > 0 }
+        .map { StopPoint(s.waypoints[it], s.stops[it]) }
 
     private fun persistDraft() {
         val s = _ui.value
@@ -184,7 +216,8 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun addWaypoint(p: GeoPoint) {
         val s = _ui.value
-        setWaypoints(s.waypoints + p, stops = stopsOf(s) + 0)
+        // Keep an imported/online route when adding at the end: the new point is joined with a straight leg.
+        setWaypoints(s.waypoints + p, s.routed?.let { it + p }, stops = stopsOf(s) + 0)
     }
 
     fun removeWaypoint(i: Int) {
@@ -235,6 +268,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         if (i !in s.waypoints.indices) return
         _ui.update { it.copy(stops = stopsOf(s).toMutableList().also { l -> l[i] = seconds.coerceIn(0, 3600) }) }
         persistDraft()
+        syncRouteToSimulation()
     }
 
     /** Optional online routing between the user's waypoints. */
@@ -337,6 +371,8 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     // ---- simulation commands -------------------------------------------------------------------
 
     private fun startSim(points: List<GeoPoint>, stops: List<StopPoint> = emptyList()) {
+        simPoints = points
+        simStops = stops
         val s = settings.value
         viewModelScope.launch {
             // Once the simulation runs, Android reports only the mock position. So remember the real
@@ -368,10 +404,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         val r = s.polyline
         if (r.size < 2) { toast(R.string.msg_need_two_points); return }
         // Waiting is applied at every waypoint except the last one (arriving there ends the route).
-        val stops = s.waypoints.indices
-            .filter { it < s.waypoints.lastIndex && s.stops.getOrElse(it) { 0 } > 0 }
-            .map { StopPoint(s.waypoints[it], s.stops[it]) }
-        startSim(r, stops)
+        startSim(r, routeStops(s))
     }
 
     fun pause() = SimulationService.command(app, SimulationService.ACTION_PAUSE)

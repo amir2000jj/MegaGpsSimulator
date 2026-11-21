@@ -89,7 +89,7 @@
     <string name="auto_route">Auto route (online)</string>
     <string name="save_route">Save route</string>
     <string name="use_route">Use route</string>
-    <string name="routed_note">Following an imported or online route. Editing points resets it to straight legs.</string>
+    <string name="routed_note">Following an imported or online route. Adding points at the end keeps it; other edits reset it to straight legs.</string>
     <string name="start_point">Start</string>
     <string name="destination">Destination</string>
     <string name="waypoint">Waypoint</string>
@@ -164,4 +164,6 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="msg_route_extended">Route extended: the simulation continues to the new points</string>
+    <string name="msg_live_edit_limit">While simulating, only points added at the end are applied. Stop and start again to apply other changes.</string>
 </resources>
